@@ -1,0 +1,930 @@
+definitions:
+  models.BookHotelRequest:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      hotelID:
+        type: integer
+      room_id:
+        type: integer
+      roomType:
+        type: string
+      userID:
+        type: integer
+    type: object
+  models.BookHotelUpdateRequest:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      id:
+        type: integer
+      room_id:
+        type: integer
+      roomType:
+        type: string
+    type: object
+  models.CreateHotelRequest:
+    properties:
+      address:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      rating:
+        type: integer
+    type: object
+  models.CreateRoomRequest:
+    properties:
+      hotel_id:
+        type: integer
+      price_per_night:
+        type: number
+      room_type:
+        type: string
+    type: object
+  models.CreateWaitingList:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      hotel_id:
+        type: integer
+      room_type:
+        type: string
+      user_email:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.GeneralResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.GetHotelResponse:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      rating:
+        type: integer
+      rooms:
+        items:
+          $ref: '#/definitions/models.UpdateRoomRequest'
+        type: array
+    type: object
+  models.GetRoomResponse:
+    properties:
+      rooms:
+        items:
+          $ref: '#/definitions/models.UpdateRoomRequest'
+        type: array
+    type: object
+  models.GetUserResponse:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      logout:
+        type: boolean
+      username:
+        type: string
+    type: object
+  models.GetUsersBookResponse:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      hotelID:
+        type: integer
+      id:
+        type: integer
+      room_id:
+        type: integer
+      roomType:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+      userID:
+        type: integer
+    type: object
+  models.GetWaitinglistResponse:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      hotel_id:
+        type: integer
+      id:
+        type: integer
+      room_type:
+        type: string
+      status:
+        type: string
+      user_email:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.LogInRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.RegisterUserRequest:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UpdateHotelRequest:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      rating:
+        type: integer
+    type: object
+  models.UpdateRoomRequest:
+    properties:
+      available:
+        type: boolean
+      hotel_id:
+        type: integer
+      id:
+        type: integer
+      price_per_night:
+        type: number
+      room_type:
+        type: string
+    type: object
+  models.UpdateUserRequest:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UpdateWaitingListRequest:
+    properties:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+      hotel_id:
+        type: integer
+      id:
+        type: integer
+      room_type:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.VerifyRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is an API for booking Hotels.
+  title: Booking Hotel API
+  version: "2.0"
+paths:
+  /bookings:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new booking for a hotel room based on the provided details
+      parameters:
+      - description: Booking details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BookHotelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking created successfully
+          schema:
+            $ref: '#/definitions/models.GeneralResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a new booking
+      tags:
+      - Booking
+  /bookings/:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a specific booking using its ID
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking details
+          schema:
+            $ref: '#/definitions/models.GetUsersBookResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve a booking by ID
+      tags:
+      - Booking
+  /bookings/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing booking based on the provided booking ID
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking successfully deleted
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a booking
+      tags:
+      - Booking
+  /bookings/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing booking based on the provided
+        ID and updated information
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated booking details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BookHotelUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking updated successfully
+          schema:
+            $ref: '#/definitions/models.GeneralResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update a booking
+      tags:
+      - Booking
+  /hotels:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a list of all hotels in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of hotels
+          schema:
+            items:
+              $ref: '#/definitions/models.GetHotelResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve a list of hotels
+      tags:
+      - Hotel
+  /hotels/:
+    get:
+      consumes:
+      - application/json
+      description: Fetches details of a hotel by its ID
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel details
+          schema:
+            $ref: '#/definitions/models.GetHotelResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve hotel information
+      tags:
+      - Hotel
+  /hotels/create:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new hotel to the system
+      parameters:
+      - description: Hotel details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateHotelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel created successfully
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a new hotel
+      tags:
+      - Hotel
+  /hotels/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a hotel by its ID
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel deletion confirmation
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a hotel
+      tags:
+      - Hotel
+  /hotels/rooms:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a list of all rooms within a specific hotel
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of rooms
+          schema:
+            items:
+              $ref: '#/definitions/models.GetRoomResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve rooms by hotel ID
+      tags:
+      - Room
+  /hotels/rooms/:
+    get:
+      consumes:
+      - application/json
+      description: Fetches details of a specific room within a hotel by its ID and
+        hotel ID
+      parameters:
+      - description: Room ID
+        in: query
+        name: room
+        required: true
+        type: integer
+      - description: Hotel ID
+        in: query
+        name: hotel
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room details
+          schema:
+            $ref: '#/definitions/models.GetRoomResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve room information
+      tags:
+      - Room
+  /hotels/rooms/create:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new room to a hotel
+      parameters:
+      - description: Room details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room created successfully
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a new room
+      tags:
+      - Room
+  /hotels/rooms/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific room from a hotel by its ID and hotel ID
+      parameters:
+      - description: Room ID
+        in: query
+        name: room
+        required: true
+        type: integer
+      - description: Hotel ID
+        in: query
+        name: hotel
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room deleted successfully
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a room
+      tags:
+      - Room
+  /hotels/rooms/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing room
+      parameters:
+      - description: Updated room details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room details updated successfully
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update room information
+      tags:
+      - Room
+  /hotels/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing hotel by its ID
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated hotel details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateHotelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel details updated successfully
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update hotel information
+      tags:
+      - Hotel
+  /users/:
+    get:
+      consumes:
+      - application/json
+      description: Fetches details of a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/models.GetUserResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve user information
+      tags:
+      - User
+  /users/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deletion message
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a user
+      tags:
+      - User
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates the user and returns a token if successful
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Log in a user
+      tags:
+      - User
+  /users/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout confirmation message
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Log out a user
+      tags:
+      - User
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user and sends a verification code to their email
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Verification code is sent to your email
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Register a new user
+      tags:
+      - User
+  /users/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates details of a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated user details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update notification message
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update user information
+      tags:
+      - User
+  /users/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the user account using the provided verification details
+      parameters:
+      - description: Verification details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: You have verified your account and now you can log in
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Verify user account
+      tags:
+      - User
+  /waitinglists:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new waiting list entry based on the provided information
+      parameters:
+      - description: Details for the new waiting list entry
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateWaitingList'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Waiting list entry created successfully
+          schema:
+            $ref: '#/definitions/models.GeneralResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Add a new entry to the waiting list
+      tags:
+      - WaitingList
+  /waitinglists/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves details of a specific waiting list entry based on the
+        provided ID
+      parameters:
+      - description: Waiting List Entry ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Details of the waiting list entry
+          schema:
+            $ref: '#/definitions/models.GetWaitinglistResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Retrieve a waiting list entry
+      tags:
+      - WaitingList
+  /waitinglists/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific waiting list entry based on the provided ID
+      parameters:
+      - description: Waiting List Entry ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirmation message
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete a waiting list entry
+      tags:
+      - WaitingList
+  /waitinglists/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates details of a specific waiting list entry based on the provided
+        ID and request body
+      parameters:
+      - description: Waiting List Entry ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Details for updating the waiting list entry
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateWaitingListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated waiting list entry details
+          schema:
+            $ref: '#/definitions/models.GeneralResponse'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update a waiting list entry
+      tags:
+      - WaitingList
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

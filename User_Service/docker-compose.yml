@@ -1,0 +1,197 @@
+services:
+  hotel_service:
+    build: ./Hotel_Service
+    container_name: hotel_service_container
+    image: hotel_service_image
+    environment:
+      - PG_URL=postgres://postgres:14022014@hotel_postgres:5432/hotel_service?sslmode=disable
+    ports:
+      - 9999:9999
+    depends_on:
+      - hotel_postgres
+    networks:
+      - mynetwork
+  user_service:
+    build: ./User_Service
+    container_name: user_service_container
+    image: user_service_image
+    environment:
+      - PG_URL=postgres://postgres:14022014@user_postgres:5432/user_service?sslmode=disable
+    ports:
+      - 7777:7777
+    depends_on:
+      - user_postgres
+      - broker
+    networks:
+      - mynetwork
+
+  booking_service:
+    build: ./Booking_Service
+    container_name: booking_service_container
+    image: booking_service_image
+    environment:
+      - PG_URL=postgres://postgres:14022014@booking_postgres:5432/booking_service?sslmode=disable
+    ports:
+      - 8082:8082
+    depends_on:
+      - booking_postgres
+      - migrate_booking
+      - broker
+    networks:
+      - mynetwork
+  notification_service:
+    build: ./Notification_Service
+    container_name: notification_service_container
+    image: notification_service_image
+    ports:
+      - "8877:8877"
+      - "50051:50051"
+    depends_on:
+      - broker
+    networks:
+      - mynetwork
+#... rest of your docker-compose.yml
+
+
+  broker:
+    image: apache/kafka:latest
+    container_name: kafka_broker
+    ports:
+      - "9092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    networks:
+      - mynetwork
+
+  user_postgres:
+    image: postgres:13
+    container_name: user_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 14022014
+      POSTGRES_DB: user_service
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  migrate_user:
+    image: migrate/migrate
+    volumes:
+      - ./User_Service/internal/database/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://postgres:14022014@user_postgres:5432/user_service?sslmode=disable", "up"]
+    depends_on:
+      user_postgres:
+        condition: service_healthy
+    networks:
+      - mynetwork
+
+  hotel_postgres:
+    image: postgres:14-alpine
+    container_name: hotel_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 14022014
+      POSTGRES_DB: hotel_service
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - hotel-db-data:/var/lib/postgresql/data
+      - ./hotel_service/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hotel_service || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - mynetwork
+
+  migrate_hotel:
+    image: migrate/migrate
+    volumes:
+      - ./hotel_service/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://postgres:14022014@hotel_postgres:5432/hotel_service?sslmode=disable", "up"]
+    depends_on:
+      hotel_postgres:
+        condition: service_healthy
+    networks:
+      - mynetwork
+
+  booking_postgres:
+    image: postgres:14-alpine
+    container_name: booking_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 14022014
+      POSTGRES_DB: booking_service
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+      - ./booking_service/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d booking_service || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - mynetwork
+
+  migrate_booking:
+    image: migrate/migrate
+    volumes:
+      - ./booking_service/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://postgres:14022014@booking_postgres:5432/booking_service?sslmode=disable", "up"]
+    depends_on:
+      booking_postgres:
+        condition: service_healthy
+    networks:
+      - mynetwork
+
+  redis:
+    container_name: redis_container
+    image: redis:latest
+    ports:
+      - "6378:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  user-db-data:
+  hotel-db-data:
+  booking-db-data:
+  

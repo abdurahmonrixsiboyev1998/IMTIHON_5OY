@@ -87,7 +87,7 @@ services:
       PGDATA: /var/lib/postgresql/data
     volumes:
       - user-db-data:/var/lib/postgresql/data
-      - ./User_Service/internal/database/migrations:/docker-entrypoint-initdb.d
+      - ./User_Service/internal/migrations:/docker-entrypoint-initdb.d
     ports:
       - "5435:5432"
     healthcheck:
@@ -102,7 +102,7 @@ services:
   migrate_user:
     image: migrate/migrate
     volumes:
-      - ./User_Service/internal/database/migrations:/migrations
+      - ./User_Service/internal/migrations:/migrations
     command: ["-path", "/migrations", "-database", "postgres://postgres:14022014@user_postgres:5432/user_service?sslmode=disable", "up"]
     depends_on:
       user_postgres:
@@ -120,7 +120,7 @@ services:
       PGDATA: /var/lib/postgresql/data
     volumes:
       - hotel-db-data:/var/lib/postgresql/data
-      - ./hotel_service/migrations:/docker-entrypoint-initdb.d
+      - ./Hotel_Service/internal/migrations:/docker-entrypoint-initdb.d
     ports:
       - "5433:5432"
     healthcheck:
@@ -135,7 +135,7 @@ services:
   migrate_hotel:
     image: migrate/migrate
     volumes:
-      - ./hotel_service/migrations:/migrations
+      - ./Hotel_Service/internal/migrations:/migrations
     command: ["-path", "/migrations", "-database", "postgres://postgres:14022014@hotel_postgres:5432/hotel_service?sslmode=disable", "up"]
     depends_on:
       hotel_postgres:
@@ -153,7 +153,7 @@ services:
       PGDATA: /var/lib/postgresql/data
     volumes:
       - booking-db-data:/var/lib/postgresql/data
-      - ./booking_service/migrations:/docker-entrypoint-initdb.d
+      - ./Booking_Service/internal/migrations:/docker-entrypoint-initdb.d
     ports:
       - "5434:5432"
     healthcheck:
@@ -168,7 +168,7 @@ services:
   migrate_booking:
     image: migrate/migrate
     volumes:
-      - ./booking_service/migrations:/migrations
+      - ./Booking_Service/internal/migrations:/migrations
     command: ["-path", "/migrations", "-database", "postgres://postgres:14022014@booking_postgres:5432/booking_service?sslmode=disable", "up"]
     depends_on:
       booking_postgres:
